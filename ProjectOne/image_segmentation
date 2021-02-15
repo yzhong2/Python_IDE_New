@@ -1,0 +1,135 @@
+import numpy as np
+from scipy import ndimage
+import matplotlib.pyplot as plt
+
+np.random.seed(1)
+n = 10
+l = 256
+im = np.zeros((l, l))
+points = l*np.random.random((2, n**2))
+im[(points[0]).astype(np.int), (points[1]).astype(np.int)] = 1
+im = ndimage.gaussian_filter(im, sigma=l/(4.*n))
+mask = im > im.mean()
+print(type(points[0]))
+print(points[0].shape)
+print(points[0].ndim)
+# print(dir(points[0]))
+mask = im > im.mean()
+### this is for finding the connected components. the function will return the label for each pixel
+### also the function will return the maximun label number
+label_im, nb_labels = ndimage.label(mask)
+sizes = ndimage.sum(mask, label_im, range(nb_labels + 1))
+#### this is label
+print(label_im[3])
+print(sizes)
+print(len(sizes))
+print('unique value of label_im')
+### in label_im it contains all component label number for each cell
+print(np.unique(label_im))
+print('before sizes')
+#### this sum is for the size of total components, range is control the number of components will be return
+sizes = ndimage.sum(mask, label_im, range(nb_labels+1))
+print(len(sizes))
+print(sizes)
+#### this is for the mask size
+mask_size = sizes < 1000
+print(type(mask_size))
+print(mask_size.shape)
+#### this for the remove the pixel
+remove_pixel = mask_size[label_im]
+label_im[remove_pixel] = 0
+print(label_im.shape)
+print(np.unique(label_im))
+### this step is for the show the image
+#plt.imshow(label_im)
+#plt.show()
+
+###
+labels = np.unique(label_im)
+print('step 1')
+print(labels)
+label_im = np.searchsorted(labels, label_im)
+# print('step 2')
+# print(np.unique(label_im))
+# print('label_im is')
+# print(np.unique(label_im))
+#
+# ### this is a testing
+# result = ndimage.find_objects(label_im==4)
+# print('result is')
+# print(type(result))
+# print(len(result))
+# print('0 position is ')
+# print(type(result[0]))
+# print('the length of tuple is')
+# print(len(result[0]))
+# print(result[0])
+#
+# exit(0)
+
+
+
+### this is test
+x, y = np.indices((100, 100))
+print('x is ')
+print(type(x))
+print(x.shape)
+print(x[0:3, 0:3])
+print(type(y))
+print(y.shape)
+print(y[0:3, 0:3])
+
+### this is for array index
+a = np.zeros((6,6), dtype=int)
+a[2:4, 2:4] = 1
+a[4, 4] = 1
+a[:2, :3] = 2
+a[0, 5] = 3
+find1 = ndimage.find_objects(a)
+find2 = ndimage.find_objects(a, max_label=2)
+find3 = ndimage.find_objects(a == 1, max_label=2)
+print('find1 is ')
+print(find1)
+print('find1 0 is')
+print(find1[0])
+print('a content for find1')
+print(a[find1[1]])
+# exit(0)
+print('the type of label_im is')
+print(type(label_im))
+print(label_im.shape)
+
+### this is for the region detection
+from scipy import misc
+f = misc.face(gray=True)
+sx, sy = f.shape
+print('image shape is')
+print(f.shape)
+
+X, Y = np.ogrid[0:sx, 0:sy]
+print('THis is X information')
+print(X.shape)
+print(np.min(X))
+print(np.max(X))
+print('Y.shape is ')
+print(np.max(Y))
+regions = (sy//6) * (X//4) + (Y//6)  # note that we use broadcasting
+### this is regions information
+# print('sy dimension')
+# print(sy.shape)
+print('this is regions shape')
+print(regions.shape)
+
+### this region documentation
+sx, sy = f.shape
+print('sx is')
+print(sx)
+print('sy is')
+print(sy)
+X, Y = np.ogrid[0:sx, 0:sy]
+r = np.hypot(X - sx/2, Y - sy/2)
+r_bin = (20*r/r.max()).astype(np.int)
+rad_mean = ndimage.mean(r, labels = r_bin, index = np.arange(1, r_bin.max()+1))
+plt.imshow(r_bin, cmap=plt.cm.nipy_spectral)
+plt.axis('off')
+plt.show()
